@@ -1,1 +1,5 @@
-Install wsl2
+02.08.2026
+
+Install wsl2 with command: wsl --install in powershell
+
+Install docker Desktop set mark on Use WSL 2 instead of Hyper-V
