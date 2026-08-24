@@ -1,0 +1,11 @@
+02.08.2026 (2hours)
+
+Set up WSL2 + Ubuntu on Windows 11
+Installed Docker Desktop with WSL2 backend, connected it to Ubuntu
+Set up VS Code with WSL extension for editing directly in Linux
+Created project folder + git repo, set up folder structure (docker/, scripts/, src/, include/) as planned in proposal
+Wrote Dockerfile installing base build tools (nasm, qemu, grub tools, gdb, etc.)
+Built and tested first Docker image successfully
+Wrote script to build custom cross-compiler (i686-elf-gcc) for freestanding 32-bit x86 code
+Added cross-compiler build into Dockerfile, rebuilt image
+Testing cross-compiler build 
