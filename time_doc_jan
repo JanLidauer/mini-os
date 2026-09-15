@@ -8,4 +8,12 @@ Wrote Dockerfile installing base build tools (nasm, qemu, grub tools, gdb, etc.)
 Built and tested first Docker image successfully
 Wrote script to build custom cross-compiler (i686-elf-gcc) for freestanding 32-bit x86 code
 Added cross-compiler build into Dockerfile, rebuilt image
-Testing cross-compiler build 
+Testing cross-compiler build
+
+24.08.2026
+
+Removed README.md
+Wrote boot.s (multiboot header, stack setup, entry point that calls kernel_main) based on OSDev Bare Bones tutorial
+Wrote kernel.c with VGA text mode terminal driver (terminal_initialize, terminal_putchar, terminal_writestring) and kernel_main printing "Hello, kernel World!"
+Compiled boot.s and kernel.c to boot.o and kernel.o
+Merged changes into main
