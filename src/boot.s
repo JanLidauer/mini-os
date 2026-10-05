@@ -1,7 +1,13 @@
 
 /* Code from https://wiki.osdev.org/Bare_Bones#Building_a_Cross-Compiler bootstrap assembly */
+/*comments added by jan lidauer */
+
 
 /* Declare constants for the multiboot header. */
+/* with .set * the assembler replaces that word always with the specified byte so 1<<0 is 0000 0001 or 1, 
+with 1<<1 a bitshift happens and the whole byte is moved one bit to the left so 0000 0010 or 2,
+the pipe symbol is an or operation with merges two bytes and if at least one is 1 at a certain pos the result is 1 too else its 0 so from 0000 0001 | 0000 0010 becomes 0000 0011 */
+
 .set ALIGN,    1<<0             /* align loaded modules on page boundaries */
 .set MEMINFO,  1<<1             /* provide memory map */
 .set FLAGS,    ALIGN | MEMINFO  /* this is the Multiboot 'flag' field */

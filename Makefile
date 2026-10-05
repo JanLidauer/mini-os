@@ -6,7 +6,7 @@ SRC_DIR   := src
 BUILD_DIR := build
 ISO_DIR   := $(BUILD_DIR)/isodir
 
-CFLAGS    := -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+CFLAGS    := -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Iinclude
 LDFLAGS   := -ffreestanding -O2 -nostdlib
 
 KERNEL    := $(BUILD_DIR)/myos.bin
@@ -19,14 +19,16 @@ all: $(KERNEL)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(BUILD_DIR)/boot.o: $(SRC_DIR)/boot.s | $(BUILD_DIR)
+OBJS      := $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/gdt.o $(BUILD_DIR)/gdt_flush.o
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.s | $(BUILD_DIR)
 	$(AS) $< -o $@
 
-$(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-$(KERNEL): $(SRC_DIR)/linker.ld $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o
-	$(CC) -T $(SRC_DIR)/linker.ld -o $@ $(LDFLAGS) $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o -lgcc
+$(KERNEL): $(SRC_DIR)/linker.ld $(OBJS)
+	$(CC) -T $(SRC_DIR)/linker.ld -o $@ $(LDFLAGS) $(OBJS) -lgcc
 
 iso: $(KERNEL)
 	mkdir -p $(ISO_DIR)/boot/grub
