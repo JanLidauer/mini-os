@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "gdt.h"
+#include "idt.h"
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -112,7 +113,11 @@ void kernel_main(void)
 	terminal_initialize();
 
 	gdt_install();
+	idt_install();
 
 	/* Newline support is left as an exercise. */
 	terminal_writestring("Hello, kernel World!\n");
+
+	/* IDT Test: Testweise eine Exception ausloesen (Breakpoint, index 3)*/
+	// asm volatile("int $0x3");
 }

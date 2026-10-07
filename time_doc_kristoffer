@@ -1,1 +1,12 @@
+02.08.2026 (2hours)
 
+Set up WSL2 + Ubuntu on Windows 11
+Installed Docker Desktop with WSL2 backend, connected it to Ubuntu
+Set up VS Code with WSL extension for editing directly in Linux
+Pulled project structure from github
+
+07.10.2026
+IDT basics implementiert: 256-Eintraege-Tabelle (idt.c/idt.h/idt_flush.s) sowie
+32 Assembler-Stubs fuer die CPU-Exceptions mit zentralem C-Handler (isr_stubs.s/isr.c/isr.h),
+der Exceptions mit Namen auf dem Bildschirm ausgibt und den Kernel danach sicher anhaelt.
+(eingebunden in kernel.c via idt_install().)
