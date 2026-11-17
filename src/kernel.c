@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include "gdt.h"
 #include "idt.h"
+#include "irq.h"
+#include "timer.h"
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -86,14 +88,37 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 	terminal_buffer[index] = vga_entry(c, color);
 }
 
+/* schiebt alle zeilen um eins nach oben und leert die letzte zeile */
+static void terminal_scroll(void)
+{
+	for (size_t y = 1; y < VGA_HEIGHT; y++) {
+		for (size_t x = 0; x < VGA_WIDTH; x++)
+			terminal_buffer[(y - 1) * VGA_WIDTH + x] = terminal_buffer[y * VGA_WIDTH + x];
+	}
+	for (size_t x = 0; x < VGA_WIDTH; x++)
+		terminal_buffer[(VGA_HEIGHT - 1) * VGA_WIDTH + x] = vga_entry(' ', terminal_color);
+}
+
+/* geht in die naechste zeile, scrollt wenn der bildschirm voll ist */
+static void terminal_newline(void)
+{
+	terminal_column = 0;
+	if (++terminal_row == VGA_HEIGHT) {
+		terminal_scroll();
+		terminal_row = VGA_HEIGHT - 1;
+	}
+}
+
 void terminal_putchar(char c) 
 {
-	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-	if (++terminal_column == VGA_WIDTH) {
-		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
-			terminal_row = 0;
+	if (c == '\n') {
+		terminal_newline();
+		return;
 	}
+
+	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+	if (++terminal_column == VGA_WIDTH)
+		terminal_newline();
 }
 
 void terminal_write(const char* data, size_t size) 
@@ -107,6 +132,19 @@ void terminal_writestring(const char* data)
 	terminal_write(data, strlen(data));
 }
 
+/* zeigt den timer-zaehler oben rechts an: beweist, dass hardware-irqs ankommen.
+   schreibt direkt an feste position, ohne den cursor des terminals anzufassen */
+static void show_timer_ticks(void)
+{
+	uint32_t n = timer_ticks;
+	size_t x = VGA_WIDTH - 1;
+
+	do {
+		terminal_putentryat('0' + (n % 10), vga_entry_color(VGA_COLOR_LIGHT_CYAN, VGA_COLOR_BLACK), x--, 0);
+		n /= 10;
+	} while (n > 0);
+}
+
 void kernel_main(void) 
 {
 	/* Initialize terminal interface */
@@ -114,10 +152,22 @@ void kernel_main(void)
 
 	gdt_install();
 	idt_install();
+	irq_install();   /* pic remappen: hardware-irqs auf vektor 32-47 */
+	timer_install(); /* irq 0 mitzaehlen lassen */
 
-	/* Newline support is left as an exercise. */
 	terminal_writestring("Hello, kernel World!\n");
+	terminal_writestring("GDT, IDT und PIC aktiv, Interrupts laufen.\n");
 
 	/* IDT Test: Testweise eine Exception ausloesen (Breakpoint, index 3)*/
 	// asm volatile("int $0x3");
+
+	/* ab hier duerfen hardware-interrupts ankommen. gdt, idt und pic muessen davor stehen */
+	asm volatile("sti");
+
+	/* leerlauf: hlt schlaeft bis zum naechsten interrupt (timer, spaeter tastatur).
+	   kernel_main darf nicht zurueckkehren, weil boot.s danach mit cli stehen bleibt */
+	for (;;) {
+		asm volatile("hlt");
+		show_timer_ticks();
+	}
 }

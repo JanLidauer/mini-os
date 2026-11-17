@@ -20,7 +20,8 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 OBJS      := $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/gdt.o $(BUILD_DIR)/gdt_flush.o \
-             $(BUILD_DIR)/idt.o $(BUILD_DIR)/idt_flush.o $(BUILD_DIR)/isr_stubs.o $(BUILD_DIR)/isr.o
+             $(BUILD_DIR)/idt.o $(BUILD_DIR)/idt_flush.o $(BUILD_DIR)/isr_stubs.o $(BUILD_DIR)/isr.o \
+             $(BUILD_DIR)/pic.o $(BUILD_DIR)/irq.o $(BUILD_DIR)/irq_stubs.o $(BUILD_DIR)/timer.o
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s | $(BUILD_DIR)
 	$(AS) $< -o $@
